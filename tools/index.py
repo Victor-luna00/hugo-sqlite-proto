@@ -29,6 +29,7 @@ CONTENT = Path("content")
 DB = Path("build/site.db")
 OUT_SEARCH = Path("static/search.json")
 OUT_TAGS = Path("data/tags.json")
+OUT_WORDS = Path("data/words.json")
 
 SCHEMA = """
 CREATE TABLE posts (
@@ -43,8 +44,12 @@ CREATE TABLE tags (
   tag TEXT NOT NULL,
   PRIMARY KEY (url, tag)
 );
-"""
 
+CREATE TABLE words (
+  url TEXT PRIMARY KEY REFERENCES posts(url),
+  n INTEGER NOT NULL
+);
+"""
 # SQL produce directamente el JSON (extensión json1 de SQLite).
 Q_SEARCH = """
 SELECT json_group_array(json_object(
@@ -150,6 +155,9 @@ def build_db(pages):
     con.executemany(
         "INSERT OR IGNORE INTO tags(url, tag) VALUES (?, ?)",
         [(p["url"], t) for p in pages for t in p["tags"]])
+    con.executemany(
+        "INSERT INTO words(url, n) VALUES (?, ?)",
+        [(p["url"], len(p["text"].split())) for p in pages])
     con.commit()
     return con
 
@@ -166,6 +174,7 @@ def main():
     con = build_db(pages)
     export(con, Q_SEARCH, OUT_SEARCH)
     export(con, Q_TAGS, OUT_TAGS)
+    export(con, "SELECT json_object('total', COALESCE(SUM(n), 0)) FROM words", OUT_WORDS)	
     con.close()
     print(f"index: {len(pages)} páginas → {OUT_SEARCH}, {OUT_TAGS}")
 
