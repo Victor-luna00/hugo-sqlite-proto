@@ -70,6 +70,20 @@ Makefile            index · build · serve · check · clean
 4. Cambia la búsqueda para ordenar los resultados por número de coincidencias (sigue siendo una función pura).
 5. Despliega `public/` con `rsync` a tu VPS o con GitHub Pages. ¿Qué proceso corre en el servidor? (Ninguno de tuyos.)
 
+
+### Ejercicios completados
+
+- **Ejercicio 1:** añadido el artículo `Introducción a SQL` con la etiqueta `sql`. Se comprueba que el índice actualiza el número de publicaciones de esa etiqueta.
+- **Ejercicio 3:** creada la tabla SQLite `words(url, n)` para guardar el número de palabras de cada publicación. El total se exporta a `data/words.json` y Hugo lo muestra en el pie de página.
+
+El flujo implementado es:
+
+`content/*.md → tools/index.py → SQLite → JSON → Hugo → public/`
+
+SQLite se utiliza únicamente durante la generación del sitio. En producción se sirven archivos estáticos, sin necesitar una base de datos.
+
+
+
 ## Límites a propósito (KISS)
 
 `tools/index.py` entiende front matter YAML simple (`clave: valor` y `tags: [a, b]`); no TOML ni listas
